@@ -1,0 +1,55 @@
+version: "3.8"
+
+
+services:
+
+  db_1:
+    image: postgres
+    container_name: zlava
+    env_file:
+      - ../docker/env.dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data/
+
+  redis:
+    image: "redis:alpine"
+
+  celery:
+    build: .
+    command: celery -A  docker.celery worker --loglevel=INFO
+#    volumes:
+#      - .:/gost/gost_2/gost_3/docker/
+    env_file:
+      - ../docker/env.dev
+    depends_on:
+      - django
+      - redis
+  celery-beat:
+    build: ./project
+    command: celery -A docker beat -l info
+    volumes:
+      - ./manage/manage_1/manage_2/docker/:/manage/manage_1/manage_2/docker/
+    env_file:
+      - ../docker/env.dev
+    depends_on:
+      - redis
+
+  django:
+    build: .
+    restart: always
+    container_name: django_home
+    command: python manage.py runserver 0.0.0.0:8000
+#    volumes:
+#      - .:/gost/gost_2/gost_3/docker/
+    ports:
+      - "8000:8000"
+    env_file:
+     - ../docker/env.dev
+    links:
+      - "db_1:db"
+    depends_on:
+      - db_1
+      - redis
+
+volumes:
+  pgdata:
