@@ -13,6 +13,9 @@ djangorestframework-simplejwt = "*"
 celery = "*"
 django-celery-beat = "*"
 redis = "*"
+timedelta = "*"
+
+
 
 [dev-packages]
 

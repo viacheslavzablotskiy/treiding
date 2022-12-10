@@ -17,18 +17,18 @@ services:
   celery:
     build: .
     command: celery -A  docker.celery worker --loglevel=INFO
-#    volumes:
-#      - .:/gost/gost_2/gost_3/docker/
+    volumes:
+      - .:/manage/manage_1/manage_2/docker
     env_file:
       - ../docker/env.dev
     depends_on:
       - django
       - redis
   celery-beat:
-    build: ./project
+    build: .
     command: celery -A docker beat -l info
     volumes:
-      - ./manage/manage_1/manage_2/docker/:/manage/manage_1/manage_2/docker/
+      - ./docker/:/manage/manage_1/manage_2/docker
     env_file:
       - ../docker/env.dev
     depends_on:
