@@ -16,9 +16,9 @@ services:
 
   celery:
     build: .
-    command: celery -A  docker.celery worker --loglevel=INFO
-    volumes:
-      - .:/manage/manage_1/manage_2/docker
+    command: celery -A  docker.celery  worker --loglevel=INFO
+#    volumes:
+#      - .:/manage/manage_1/manage_2
     env_file:
       - ../docker/env.dev
     depends_on:
@@ -27,8 +27,8 @@ services:
   celery-beat:
     build: .
     command: celery -A docker beat -l info
-    volumes:
-      - ./docker/:/manage/manage_1/manage_2/docker
+#    volumes:
+#      - .:/manage/manage_1/manage_2
     env_file:
       - ../docker/env.dev
     depends_on:
@@ -40,7 +40,7 @@ services:
     container_name: django_home
     command: python manage.py runserver 0.0.0.0:8000
 #    volumes:
-#      - .:/gost/gost_2/gost_3/docker/
+#      - .:/manage/manage_1/manage_2/docker
     ports:
       - "8000:8000"
     env_file:
