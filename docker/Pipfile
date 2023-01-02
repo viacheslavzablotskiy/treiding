@@ -14,8 +14,8 @@ celery = "*"
 django-celery-beat = "*"
 redis = "*"
 timedelta = "*"
-
-
+"backports.weakref" = "*"
+djoser = "*"
 
 [dev-packages]
 

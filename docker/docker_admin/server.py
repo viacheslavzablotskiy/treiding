@@ -1,10 +1,6 @@
-from django.contrib.auth.base_user import BaseUserManager
-from rest_framework.response import Response
-from .serializers import *
-
-from .models import *
+from docker_admin.models import Price
+def matrix(a, b):
+    return a + b
 
 
-class UserManager(BaseUserManager):
-    pass
 

@@ -1,6 +1,8 @@
+from .tasks import  trade
 from rest_framework import generics, mixins, viewsets
 from .serializers import *
-from docker_admin.models import CodeName
+from docker_admin.models import *
+
 
 
 class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -31,11 +33,18 @@ class WathList_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Cr
 class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerialisers
+    # def preform_create(self, serializer):
+    #     serializer.save(user=self.request.user)
 
 
 class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Trade.objects.all()
     serializer_class = TradeSerialisers
+
+
+
+
+
 
 
 class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -46,3 +55,5 @@ class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixi
 class Balans_balans(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Balans.objects.all()
     serializer_class = BalansSerializers
+
+

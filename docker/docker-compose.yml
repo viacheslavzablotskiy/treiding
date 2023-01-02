@@ -1,4 +1,4 @@
-version: "3.8"
+version: "3.10"
 
 
 services:
@@ -8,8 +8,8 @@ services:
     container_name: zlava
     env_file:
       - ../docker/env.dev
-    volumes:
-      - pgdata:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
 
   redis:
     image: "redis:alpine"

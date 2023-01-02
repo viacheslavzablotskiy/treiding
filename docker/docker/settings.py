@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
+    'rest_framework.authtoken',
     "docker_admin.apps.DockerAdminConfig",
     "djoser",
 
@@ -67,7 +68,7 @@ WSGI_APPLICATION = 'docker.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DATABASE', 'docker_admin'),
+        'NAME': os.environ.get('POSTGRES_DATABASE', 'postgres'),
         'USER': os.environ.get('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', '286226'),
         'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
@@ -160,7 +161,7 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_BROKER', 'redis://redis:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
