@@ -1,7 +1,8 @@
-from .tasks import  trade
+from .tasks import trade
 from rest_framework import generics, mixins, viewsets
 from .serializers import *
 from docker_admin.models import *
+
 
 
 
@@ -25,14 +26,19 @@ class Price_price(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Creat
     serializer_class = PriceSerializer
 
 
+
+
 class WathList_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerialisers
 
 
+
+
 class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerialisers
+
     # def preform_create(self, serializer):
     #     serializer.save(user=self.request.user)
 

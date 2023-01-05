@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from docker_admin.tasks import trade
+
 
 class CodeName(models.Model):
     code = models.CharField(max_length=255, null=True, unique=True)
@@ -39,6 +41,7 @@ class Price(models.Model):
 
     def __str__(self):
         return f'{self.price}'
+
 
     # def save(self, *args, **kwargs):
     #     price_item = 4
