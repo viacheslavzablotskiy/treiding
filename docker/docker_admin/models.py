@@ -30,7 +30,7 @@ class Item(models.Model):
     # price = models.ForeignKey('Price', blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.name} + {self.valuta}'
 
 
 
@@ -76,7 +76,7 @@ class WatchList(models.Model):
 
 
     def __str__(self):
-        return f'{self.item}'
+        return f'{self.item} + {self.user}+ {self.is_publishid}'
 
 
 class Offer(models.Model):
@@ -96,7 +96,7 @@ class Offer(models.Model):
         super(Offer, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f'{self.item}'
+        return f'{self.item} + {self.item}+ {self.total_price_is_offer}+{self.quantity}+{self.type_function}+{self.price}'
 
 
 class Balans(models.Model):
@@ -104,7 +104,7 @@ class Balans(models.Model):
     balans = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True, default=400)
 
     def __str__(self):
-        return f"{self.balans}"
+        return f"{self.balans} + {self.balans}"
 
 
 class Trade(models.Model):
@@ -127,7 +127,7 @@ class Trade(models.Model):
 
 
     def __str__(self):
-        return f'{self.client_offer}'
+        return f'{self.client} +{self.client_offer}+{self.quantity_client}+{self.price_total}+{self.seller}+{self.seller_offer}+{self.quantity_seller}+{self.price_total_1} '
 
 
 
@@ -142,7 +142,7 @@ class Inventory(models.Model):
 
 
     def __str__(self):
-        return f'{self.name_item}'
+        return f'{self.name_item}+{self.name_item}+{self.item_1}+{self.count_item}+{self.quantity}'
 
     # def count(self, *args, **kwargs):
     #     super(Inventory, self).save(*args, **kwargs)

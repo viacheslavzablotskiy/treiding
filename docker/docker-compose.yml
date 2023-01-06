@@ -21,9 +21,12 @@ services:
 #      - .:/manage/manage_1/manage_2
     env_file:
       - ../docker/env.dev
+    links:
+      - 'db_1:db'
     depends_on:
       - django
       - redis
+
   celery-beat:
     build: .
     command: celery -A docker beat -l info
@@ -31,6 +34,8 @@ services:
 #      - .:/manage/manage_1/manage_2
     env_file:
       - ../docker/env.dev
+    links:
+      - 'db_1:db'
     depends_on:
       - redis
 

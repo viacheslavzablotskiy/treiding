@@ -1,9 +1,10 @@
 from __future__ import absolute_import, unicode_literals
 
 from time import sleep
-from .models import *
+
 from celery import shared_task, Celery
 from celery.schedules import crontab
+from django.db.models import Max
 
 
 # (run_every=(crontab(minute=1)))
@@ -13,13 +14,45 @@ from celery.schedules import crontab
 #     super(Offer, self).save(*args, **kwargs)
 
 @shared_task
+def price():
+    from docker_admin.models import  Offer, Price
+    p = Offer.objects.aggregate(Max("price"))
+    g = Price.objects.all()
+    g = list(g)
+    g = g[0]
+    g.price = p.price
+    g.save()
+@shared_task
 def trade():
-    # price = 50.00
-    # number = 40.00
-    # price_number = number + price
-    p = Price.objects.filter(price=300.00)
-    if p.exists():
-        Price.objects.create(price=900.00)
+    from docker_admin.models import Offer, Balans, Trade
+    p = Offer.objects.filter(type_function=1)
+    g = Offer.objects.filter(type_function=2)
+    l = Balans.objects.filter(user=p.user)
+    if p.exists() and g.exists() and l.balans > g.price_total:
+        Trade.objects.create(client=p.user, client_offer = p, quantity_client = p.qunatity,
+        price_total=p.total_price_is_offer, seller= g.user, seller_offer = g, quantity_seller = g.qunatity,
+                             price_total_1 = g.total_price_is_offer)
+
+@shared_task
+def balance():
+    from docker_admin.models import Balans, Trade, Offer
+    p = Offer.objects.filter(type_function=1)
+    g = Offer.objects.filter(type_function=2)
+    l = Trade.objects.filter(client=p.user, seller=g.user)
+    user_1 = Balans.objects.filter(user=p.user)
+    user_2 = Balans.objects.filter(user=g.user)
+    if l.exists():
+        user_1.balans -= g.total_price_is_offer
+        user_1.balans.save()
+        user_2.balans += g.total_price_is_offer
+        user_2.balans.save()
+        p.qunatity -= g.qunatity
+        p.qunatity.save()
+
+
+
+
+
     # type_function = self.offer.type_function
     # quantity = self.offer.quantity
     # price = self.offer.price
