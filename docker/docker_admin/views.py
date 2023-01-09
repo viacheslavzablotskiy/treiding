@@ -1,4 +1,4 @@
-from .tasks import trade
+
 from rest_framework import generics, mixins, viewsets
 from .serializers import *
 from docker_admin.models import *

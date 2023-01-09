@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from docker_admin.tasks import trade
+
 
 
 class CodeName(models.Model):
@@ -106,6 +106,14 @@ class Balans(models.Model):
     def __str__(self):
         return f"{self.balans} + {self.balans}"
 
+    @receiver(post_save, sender=User)
+    def create_user_balans(sender, instance, created, **kwargs):
+        if created:
+            Balans.objects.create(user=instance, balans=0)
+
+
+
+
 
 class Trade(models.Model):
     client = models.ForeignKey(User, blank=True, null=True, on_delete=models.CASCADE, related_name="client_trade",
@@ -123,8 +131,6 @@ class Trade(models.Model):
                                      related_query_name="seller_offer_trade")
     quantity_seller = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True, default=400)
     price_total_1 = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True)
-
-
 
     def __str__(self):
         return f'{self.client} +{self.client_offer}+{self.quantity_client}+{self.price_total}+{self.seller}+{self.seller_offer}+{self.quantity_seller}+{self.price_total_1} '
