@@ -21,13 +21,6 @@ class Item_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Create
     serializer_class = ItemSerializer
 
 
-class Price_price(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
-    queryset = Price.objects.all()
-    serializer_class = PriceSerializer
-
-
-
-
 class WathList_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerialisers

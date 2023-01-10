@@ -27,20 +27,11 @@ class Currency(models.Model):
 class Item(models.Model):
     name = models.ForeignKey('CodeName', max_length=255, blank=True, null=True, on_delete=models.SET_NULL)
     valuta = models.ForeignKey('Currency', blank=True, null=True, on_delete=models.CASCADE)
+    max_price = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True)
     # price = models.ForeignKey('Price', blank=True, null=True, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.name} + {self.valuta}'
-
-
-
-class Price(models.Model):
-    price = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True)
-    # total_price = models.IntegerField(default=1)
-    # total_price_item = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.price}'
 
 
     # def save(self, *args, **kwargs):
@@ -139,20 +130,29 @@ class Trade(models.Model):
 
 class Inventory(models.Model):
     user = models.ForeignKey('auth.User', null=True, blank=True,  on_delete=models.CASCADE)
-    name_item = models.CharField(max_length=255, null=True, blank=True)
     item_1 = models.ForeignKey('Item', blank=True, null=True, on_delete=models.CASCADE, related_name="item_name_2",
                                related_query_name="item_name_2")
-    count_item = models.ForeignKey('Item', blank=True, null=True, on_delete=models.CASCADE, related_name="item_name_3",
-                             related_query_name="item_name_3")
     quantity = models.IntegerField(default=0)
 
 
     def __str__(self):
-        return f'{self.name_item}+{self.name_item}+{self.item_1}+{self.count_item}+{self.quantity}'
+        return f'{self.user} + {self.quantity} + {self.item_1}'
 
-    # def count(self, *args, **kwargs):
-    #     super(Inventory, self).save(*args, **kwargs)
-    #
+    @receiver(post_save, sender=User)
+    def create_user_balans(sender, instance, created, **kwargs):
+        if created:
+            Inventory.objects.create(user=instance, item_1=1, quantity=0)
+
+    @receiver(post_save, sender=Trade)
+    def create_user_balans(sender, instance, created, client_offer=None,  **kwargs):
+        if created:
+            Currency.objects.create(valuta="USD")
+
+
+
+
+
+
     # def save(self, *args, **kwargs):
     #     name_item = Item.objects.filter().count()
     #     self.quantity = name_item

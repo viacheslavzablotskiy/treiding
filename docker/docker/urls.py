@@ -9,7 +9,6 @@ router = routers.DefaultRouter()
 router.register(r"api", ItemViewSet),
 router.register(r"valuta", Curenccy),
 router.register(r"item", Item_table),
-router.register(r"price", Price_price),
 router.register(r'watch_list', WathList_table),
 router.register(r"Offer", Offer_offer),
 router.register(r"trade", Trade_trade),

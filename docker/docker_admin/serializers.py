@@ -21,12 +21,6 @@ class ItemSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PriceSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Price
-        fields = '__all__'
-
 
 class WatchListSerialisers(serializers.ModelSerializer):
 

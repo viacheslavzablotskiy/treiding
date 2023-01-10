@@ -14,6 +14,15 @@ app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
     'trade': {
+        'task': 'docker_admin.tasks.price',
+        'schedule': crontab(),
+    },
+
+}
+
+
+app.conf.beat_schedule = {
+    'trade': {
         'task': 'docker_admin.tasks.trade',
         'schedule': crontab(),
     },
