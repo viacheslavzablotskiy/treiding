@@ -143,10 +143,7 @@ class Inventory(models.Model):
         if created:
             Inventory.objects.create(user=instance, item_1=1, quantity=0)
 
-    @receiver(post_save, sender=Trade)
-    def create_user_balans(sender, instance, created, client_offer=None,  **kwargs):
-        if created:
-            Currency.objects.create(valuta="USD")
+
 
 
 

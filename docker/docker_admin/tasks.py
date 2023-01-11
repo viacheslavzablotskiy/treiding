@@ -37,33 +37,49 @@ def trade():
                                      price_total_1=g.total_price_is_offer)
                 s = list(Balans.objects.filter(user=g.user))
                 s = s[0]
+                f = list(Inventory.objects.filter(user=i.user))
+                f = f[0]
+                d = list(Inventory.objects.filter(user=g.user))
+                d = d[0]
                 if i.quantity > g.quantity:
                     i.quantity -= g.quantity
                     g.quantity -= g.quantity
                     u.balans -= g.total_price_is_offer
                     s.balans += g.total_price_is_offer
+                    f.quantity += g.quantity
+                    d.quantity -= g.quantity
                     u.save()
                     s.save()
                     g.delete()
                     i.save()
+                    f.save()
+                    d.save()
                 elif i.quantity < g.quantity:
                     i.quantity -= i.quantity
                     g.quantity -= i.quantity
                     u.balans -= g.total_price_is_offer
                     s.balans += g.total_price_is_offer
+                    f.quantity += i.quantity
+                    d.quantity -= i.quantity
                     u.save()
                     s.save()
                     i.delete()
                     g.save()
+                    f.save()
+                    d.save()
                 elif i.quantity == g.quantity:
                     i.quantity -= g.quantity
                     g.quantity -= g.quantity
                     u.balans -= g.total_price_is_offer
                     s.balans += g.total_price_is_offer
+                    f.quantity += g.quantity
+                    d.quantity -= g.quantity
                     s.save()
                     u.save()
                     i.delete()
                     g.delete()
+                    f.save()
+                    d.save()
             else:
                 continue
     else:
