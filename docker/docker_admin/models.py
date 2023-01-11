@@ -132,7 +132,7 @@ class Inventory(models.Model):
     user = models.ForeignKey('auth.User', null=True, blank=True,  on_delete=models.CASCADE)
     item_1 = models.ForeignKey('Item', blank=True, null=True, on_delete=models.CASCADE, related_name="item_name_2",
                                related_query_name="item_name_2")
-    quantity = models.IntegerField(default=0)
+    quantity = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True)
 
 
     def __str__(self):

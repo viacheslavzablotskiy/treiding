@@ -13,6 +13,10 @@ from django.core.management import call_command
 
 
 
-
+l = 5
+p = 3
+l-= 1
+p-= 1
+print(p, l)
 
 

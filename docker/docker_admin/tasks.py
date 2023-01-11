@@ -9,15 +9,15 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-@shared_task
-def price():
-    from docker_admin.models import Offer, Item
-    p = Offer.objects.aggregate(Max("price"))
-    g = Item.objects.all()
-    g = list(g)
-    g = g[0]
-    g.price_max = p["price__max"]
-    g.save()
+# @shared_task
+# def price():
+#     from docker_admin.models import Trade, Item
+#     p = Trade.objects.aggregate(Max("price_total_1"))
+#     g = Item.objects.all()
+#     g = list(g)
+#     g = g[0]
+#     g.price_max = p["price_total_1__max"]
+#     g.save()
 
 
 @shared_task
@@ -30,6 +30,8 @@ def trade():
         for i in p:
             u = list(Balans.objects.filter(user=i.user))
             u = u[0]
+            f = list(Inventory.objects.filter(user=i.user))
+            f = f[0]
             if u.balans > g.total_price_is_offer:
                 Trade.objects.create(client=i.user, client_offer=i, quantity_client=i.quantity,
                                      price_total=i.total_price_is_offer, seller=g.user, seller_offer=g,
@@ -37,49 +39,34 @@ def trade():
                                      price_total_1=g.total_price_is_offer)
                 s = list(Balans.objects.filter(user=g.user))
                 s = s[0]
-                f = list(Inventory.objects.filter(user=i.user))
-                f = f[0]
                 d = list(Inventory.objects.filter(user=g.user))
                 d = d[0]
-                if i.quantity > g.quantity:
+                if i.quantity > g.quantity or i.quantity == g.quantity:
+                    f.quantity = f.quantity + g.quantity
+                    d.quantity = d.quantity - g.quantity
                     i.quantity -= g.quantity
                     g.quantity -= g.quantity
                     u.balans -= g.total_price_is_offer
                     s.balans += g.total_price_is_offer
-                    f.quantity += g.quantity
-                    d.quantity -= g.quantity
                     u.save()
                     s.save()
-                    g.delete()
                     i.save()
                     f.save()
                     d.save()
+                    g.delete()
                 elif i.quantity < g.quantity:
-                    i.quantity -= i.quantity
-                    g.quantity -= i.quantity
-                    u.balans -= g.total_price_is_offer
-                    s.balans += g.total_price_is_offer
                     f.quantity += i.quantity
                     d.quantity -= i.quantity
+                    i.quantity -= i.quantity
+                    g.quantity -= i.quantity
+                    u.balans -= i.total_price_is_offer
+                    s.balans += i.total_price_is_offer
                     u.save()
                     s.save()
-                    i.delete()
                     g.save()
                     f.save()
                     d.save()
-                elif i.quantity == g.quantity:
-                    i.quantity -= g.quantity
-                    g.quantity -= g.quantity
-                    u.balans -= g.total_price_is_offer
-                    s.balans += g.total_price_is_offer
-                    f.quantity += g.quantity
-                    d.quantity -= g.quantity
-                    s.save()
-                    u.save()
                     i.delete()
-                    g.delete()
-                    f.save()
-                    d.save()
             else:
                 continue
     else:
