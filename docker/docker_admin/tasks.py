@@ -8,6 +8,7 @@ from django.db.models import Max
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
 @shared_task
 def price():
     from docker_admin.models import Offer, Item
@@ -17,7 +18,6 @@ def price():
     g = g[0]
     g.price_max = p["price__max"]
     g.save()
-
 
 
 @shared_task
@@ -108,12 +108,3 @@ def trade():
 #             s.quantity += g.quantity_client
 #             seller.quantity -= g.quantity_seller
 #             s.save()
-
-
-
-
-
-
-
-
-
