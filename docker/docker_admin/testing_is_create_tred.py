@@ -10,13 +10,12 @@ django.setup()
 
 from django.core.management import call_command
 
+from docker_admin.models import Offer, Trade
+
+p = [9, 8, 7, 8]
+p.remove(3)
+print(p)
 
 
-
-l = 5
-p = 3
-l-= 1
-p-= 1
-print(p, l)
 
 
