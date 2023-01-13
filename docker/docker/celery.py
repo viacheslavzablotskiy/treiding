@@ -12,13 +12,6 @@ app.config_from_object('django.conf:settings', namespace="CELERY")
 app.autodiscover_tasks()
 
 
-# app.conf.beat_schedule = {
-#     'trade': {
-#         'task': 'docker_admin.tasks.price',
-#         'schedule': crontab(),
-#     },
-#
-# }
 
 
 app.conf.beat_schedule = {
@@ -28,3 +21,11 @@ app.conf.beat_schedule = {
     },
 
 }
+
+# app.conf.beat_schedule = {
+#     'trade': {
+#         'task': 'docker_admin.tasks.offer',
+#         'schedule': crontab(),
+#     },
+#
+# }

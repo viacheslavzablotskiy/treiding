@@ -81,6 +81,7 @@ class Offer(models.Model):
     quantity = models.IntegerField(default=1)
     type_function = models.PositiveIntegerField(choices=RATE_CHOICES, null=True)
     price = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True)
+    is_activate = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.total_price_is_offer = self.quantity * self.price
