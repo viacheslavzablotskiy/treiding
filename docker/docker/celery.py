@@ -17,12 +17,13 @@ app.conf.beat_schedule = {
         'schedule': crontab(),
     },
 
-
     'price': {
         'task': 'docker_admin.tasks.price',
         'schedule': crontab(),
     },
 }
+#     },
+# }
 
 
 # app.conf.beat_schedule = {
