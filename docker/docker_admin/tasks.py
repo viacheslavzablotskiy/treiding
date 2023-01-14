@@ -60,8 +60,9 @@ def trade():
                         offer_sell = list(
                             Offer.objects.filter(type_function=2, price__lte=offer.price, is_activate=True))
                         for offer_1 in offer_sell:
-                            if offer_1:
-                                offer = offer
+                            if not offer_1 or not offer.is_activate:
+                                break
+                            else:
                                 Trade.objects.create(client=offer.user, client_offer=offer, quantity_client=offer.quantity,
                                                      price_total=offer.total_price_is_offer, seller=offer_1.user,
                                                      seller_offer=offer_1,
@@ -120,8 +121,7 @@ def trade():
                                     inventory_offer.save()
                                     offer_1.save()
                                     offer.save()
-                            else:
-                                continue
+
                     else:
                         continue
                 elif offer.quantity < offer_sell.quantity:
