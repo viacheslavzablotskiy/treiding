@@ -20,11 +20,7 @@ for i in l:
                 p = 3
 
         print(i)
-        # if p in l:
-        #     l.remove(p)
-        #     print(i)
-        # else:
-        #     print(i)
+        
 
 
 
