@@ -12,9 +12,20 @@ from django.core.management import call_command
 
 from docker_admin.models import Offer, Trade
 
-p = [9, 8, 7, 8]
-p.remove(3)
-print(p)
+l = [0, 2, 5, 6, 7]
+for i in l:
+        p = 5
+        if p in l:
+                s = l.index(p)
+                p = 3
+
+        print(i)
+        # if p in l:
+        #     l.remove(p)
+        #     print(i)
+        # else:
+        #     print(i)
+
 
 
 
