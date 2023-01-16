@@ -142,7 +142,8 @@ class Inventory(models.Model):
     @receiver(post_save, sender=User)
     def create_user_balans(sender, instance, created, **kwargs):
         if created:
-            Inventory.objects.create(user=instance, item_1=1, quantity=0)
+            p = Item.objects.first()
+            Inventory.objects.create(user=instance, item_1=p, quantity=0)
 
 
 

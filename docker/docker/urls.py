@@ -6,9 +6,9 @@ from django.contrib import admin
 from django.urls import path, include
 
 router = routers.DefaultRouter()
-router.register(r"api", ItemViewSet),
+router.register(r"api", ItemViewSet, basename="list_ap"),
 router.register(r"valuta", Curenccy),
-router.register(r"item", Item_table),
+router.register(r"item", Item_table, basename="item"),
 router.register(r'watch_list', WathList_table),
 router.register(r"Offer", Offer_offer),
 router.register(r"trade", Trade_trade),
@@ -21,5 +21,6 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('api/auth/', include('djoser.urls')),
+
 ]
 urlpatterns += router.urls

@@ -15,15 +15,12 @@ class CurenccySerializer(serializers.ModelSerializer):
 
 
 class ItemSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Item
         fields = '__all__'
 
 
-
 class WatchListSerialisers(serializers.ModelSerializer):
-
     class Meta:
         model = WatchList
         fields = '__all__'
@@ -31,10 +28,10 @@ class WatchListSerialisers(serializers.ModelSerializer):
 
 class OfferSerialisers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Offer
         fields = '__all__'
-
 
 
 class TradeSerialisers(serializers.ModelSerializer):
@@ -45,6 +42,7 @@ class TradeSerialisers(serializers.ModelSerializer):
 
 class InventorySerialisers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Inventory
         fields = '__all__'
@@ -52,15 +50,7 @@ class InventorySerialisers(serializers.ModelSerializer):
 
 class BalansSerializers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Balans
         fields = "__all__"
-
-
-
-
-
-
-
-
-

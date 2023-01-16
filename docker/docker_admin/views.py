@@ -1,9 +1,6 @@
-
 from rest_framework import generics, mixins, viewsets
 from .serializers import *
 from docker_admin.models import *
-
-
 
 
 class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -21,11 +18,10 @@ class Item_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Create
     serializer_class = ItemSerializer
 
 
-class WathList_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class WathList_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
+                     viewsets.GenericViewSet):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerialisers
-
-
 
 
 class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
@@ -41,12 +37,8 @@ class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Creat
     serializer_class = TradeSerialisers
 
 
-
-
-
-
-
-class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
+                          viewsets.GenericViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerialisers
 
@@ -54,5 +46,3 @@ class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixi
 class Balans_balans(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     queryset = Balans.objects.all()
     serializer_class = BalansSerializers
-
-
