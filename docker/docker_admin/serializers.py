@@ -8,59 +8,51 @@ class CodeNameSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CurenccySerializer(serializers.ModelSerializer):
+class CurrencySerializer(serializers.ModelSerializer):
     class Meta:
         model = Currency
         fields = '__all__'
 
 
 class ItemSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Item
         fields = '__all__'
 
 
-
-class WatchListSerialisers(serializers.ModelSerializer):
+class WatchListSerializers(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = WatchList
         fields = '__all__'
 
 
-class OfferSerialisers(serializers.ModelSerializer):
+class OfferSerializers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Offer
         fields = '__all__'
 
 
-
-class TradeSerialisers(serializers.ModelSerializer):
+class TradeSerializers(serializers.ModelSerializer):
     class Meta:
         model = Trade
         fields = '__all__'
 
 
-class InventorySerialisers(serializers.ModelSerializer):
+class InventorySerializers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = Inventory
         fields = '__all__'
 
 
-class BalansSerializers(serializers.ModelSerializer):
+class BalanceSerializers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
-        model = Balans
+        model = Balance
         fields = "__all__"
-
-
-
-
-
-
-
-
-

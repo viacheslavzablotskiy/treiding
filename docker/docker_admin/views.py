@@ -1,58 +1,73 @@
+from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 
-from rest_framework import generics, mixins, viewsets
+from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import *
 from docker_admin.models import *
 
 
-
-
-class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = CodeName.objects.all()
     serializer_class = CodeNameSerializer
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated,
+                          IsAdminOrReadOnly,)
 
 
-class Curenccy(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class Currency(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Currency.objects.all()
-    serializer_class = CurenccySerializer
+    serializer_class = CurrencySerializer
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated,
+                          IsAdminOrReadOnly,)
 
 
-class Item_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class Item_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
+    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated,
+                          IsAdminOrReadOnly,)
 
 
-class WathList_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class WatchList_watchlist(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
+                          mixins.CreateModelMixin,
+                          viewsets.GenericViewSet):
     queryset = WatchList.objects.all()
-    serializer_class = WatchListSerialisers
+    serializer_class = WatchListSerializers
+    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return WatchList.objects.filter(user=user.id)
 
 
-
-
-class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                  mixins.CreateModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = Offer.objects.all()
-    serializer_class = OfferSerialisers
-
-    # def preform_create(self, serializer):
-    #     serializer.save(user=self.request.user)
+    serializer_class = OfferSerializers
+    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
 
 
-class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Trade.objects.all()
-    serializer_class = TradeSerialisers
+    serializer_class = TradeSerializers
+    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
 
 
-
-
-
-
-
-class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
+class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin,
+                          viewsets.GenericViewSet):
     queryset = Inventory.objects.all()
-    serializer_class = InventorySerialisers
+    serializer_class = InventorySerializers
+    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Inventory.objects.filter(user=user.id)
 
 
-class Balans_balans(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
-    queryset = Balans.objects.all()
-    serializer_class = BalansSerializers
+class Balance_balance(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
+    queryset = Balance.objects.all()
+    serializer_class = BalanceSerializers
+    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
 
-
+    def get_queryset(self):
+        user = self.request.user
+        return Balans.objects.filter(user=user.id)
