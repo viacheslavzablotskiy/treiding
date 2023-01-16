@@ -7,13 +7,13 @@ from django.urls import path, include
 
 router = routers.DefaultRouter()
 router.register(r"api", ItemViewSet, basename="list_ap"),
-router.register(r"valuta", Curenccy),
+router.register(r"valuta", Currency),
 router.register(r"item", Item_table, basename="item"),
-router.register(r'watch_list', WathList_table),
+router.register(r'watch_list', WatchList_watchlist),
 router.register(r"Offer", Offer_offer),
 router.register(r"trade", Trade_trade),
-router.register(r"inventiry", Inventory_inventory),
-router.register(r"balans/", Balans_balans),
+router.register(r"inventory", Inventory_inventory),
+router.register(r"balance/", Balance_balance),
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/', include("rest_framework.urls")),

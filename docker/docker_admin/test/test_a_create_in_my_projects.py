@@ -17,7 +17,7 @@ def test_user_detail(client, django_user_model):
     )
     url = reverse('list_ap-detail', kwargs={'pk': user.pk})
     response = client.get(url)
-    assert response.status_code == 404
+    assert response.status_code == 401
     assert 'someone' in response.content
 
 
