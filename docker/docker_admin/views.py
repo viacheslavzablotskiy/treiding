@@ -4,7 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import *
 from docker_admin.models import *
-
+from .tasks import send_feedback_email_task
+from django.shortcuts import HttpResponse
+def index_views(request=None):
+    send_feedback_email_task.delay()
+    return HttpResponse("3kgpogjouhgiu")
 
 class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = CodeName.objects.all()
