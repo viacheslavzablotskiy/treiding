@@ -1,36 +1,62 @@
-from django.contrib.auth.base_user import AbstractBaseUser
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.contrib.auth.models import User, PermissionsMixin
+from django.db.models import signals
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from docker_admin.tasks import send_verification_email
+import uuid
+
+from django.db import models
 
 
-
-
+# class UserAccountManager(BaseUserManager):
+#     use_in_migrations = True
+#
+#     def _create_user(self, email, password, **extra_fields):
+#         if not email:
+#             raise ValueError('Email address must be provided')
+#
+#         if not password:
+#             raise ValueError('Password must be provided')
+#
+#         email = self.normalize_email(email)
+#         user = self.model(email=email, **extra_fields)
+#         user.set_password(password)
+#         user.save(using=self._db)
+#         return user
+#
+#     def create_user(self, email=None, password=None, **extra_fields):
+#         return self._create_user(email, password, **extra_fields)
+#
+#     def create_superuser(self, email, password, **extra_fields):
+#         extra_fields['is_staff'] = True
+#         extra_fields['is_superuser'] = True
+#
+#         return self._create_user(email, password, **extra_fields)
+#
+#
 # class User(AbstractBaseUser, PermissionsMixin):
-#     username = models.CharField(('username'), max_length=255, unique=True)
-#     email = models.EmailField(('email address'),\
-#         null=True, blank=True)
-#     phone = models.CharField(('phone number'), max_length=30,\
-#         null=True, blank=True)
-#     date_joined = models.DateTimeField(_('date joined'), auto_now_add=True)
-#     is_active = models.BooleanField(_('active'), default=False)
-#     is_staff = models.BooleanField(_('staff'), default=False)
+#     REQUIRED_FIELDS = []
+#     USERNAME_FIELD = 'email'
 #
-#     is_verified = models.BooleanField(_('verified'), default=False)
+#     objects = UserAccountManager()
 #
-#     objects = UserManager()
+#     email = models.EmailField('email', unique=True, blank=False, null=False)
+#     full_name = models.CharField('full name', blank=True, null=True, max_length=400)
+#     is_staff = models.BooleanField('staff status', default=False)
+#     is_active = models.BooleanField('active', default=True)
+#     is_verified = models.BooleanField('verified', default=False)  # Add the `is_verified` flag
+#     verification_uuid = models.UUIDField('Unique Verification UUID', default=uuid.uuid4)
 #
-#     USERNAME_FIELD = 'username'
-#     REQUIRED_FIELDS = ['email']
+#     def get_short_name(self):
+#         return self.email
 #
-#     class Meta:
-#         verbose_name = _('user')
-#         verbose_name_plural = _('users')
-#         unique_together = ('username', 'email', 'phone')
-
-
-
+#     def get_full_name(self):
+#         return self.email
+#
+#     def __unicode__(self):
+#         return self.email
 
 class CodeName(models.Model):
     code = models.CharField(max_length=255, null=True, unique=True)
@@ -38,6 +64,13 @@ class CodeName(models.Model):
 
     def __str__(self):
         return f'{self.name}:{self.code}'
+
+    def user_post_save(sender, instance, signal, *args, **kwargs):
+        if not instance.is_superuser:
+            # Send verification email
+            send_verification_email.delay(instance.pk)
+
+    signals.post_save.connect(user_post_save, sender=User)
 
 
 class Currency(models.Model):
@@ -57,7 +90,7 @@ class Item(models.Model):
 
 
 class WatchList(models.Model):
-    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, blank=True, null=True, on_delete=models.SET_NULL, )
     item = models.ForeignKey("Item", blank=True, null=True, on_delete=models.SET_NULL)
     is_published = models.BooleanField(default=True)
 
@@ -88,7 +121,7 @@ class Offer(models.Model):
 
 
 class Balance(models.Model):
-    user = models.ForeignKey("auth.User", null=True, blank=True, on_delete=models.SET_NULL)
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
     balance = models.DecimalField(max_digits=5, decimal_places=2, max_length=5, null=True, blank=True, default=400)
 
     def __str__(self):
