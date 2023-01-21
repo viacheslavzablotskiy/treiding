@@ -1,11 +1,27 @@
+from django.http import Http404
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly
 from .serializers import *
 from docker_admin.models import *
+import uuid
+from django.shortcuts import HttpResponse, redirect
 
-from django.shortcuts import HttpResponse
+
+
+
+
+
+def verify(request, uuid):
+    try:
+        user = User.objects.get(verification_uuid=uuid, is_verified=False)
+    except User.DoesNotExist:
+        raise Http404("User does not exist or is already verified")
+
+    user.is_verified = True
+    user.save()
+    return HttpResponse("добро пожаловать ")
 
 
 class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

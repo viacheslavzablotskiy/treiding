@@ -9,14 +9,4 @@ app = Celery('docker')
 app.config_from_object('django.conf:settings', namespace="CELERY")
 app.autodiscover_tasks()
 
-app.conf.beat_schedule = {
-    'trade': {
-        'task': 'docker_admin.tasks.trade',
-        'schedule': crontab(),
-    },
 
-    'price': {
-        'task': 'docker_admin.tasks.price',
-        'schedule': crontab(),
-    },
-}

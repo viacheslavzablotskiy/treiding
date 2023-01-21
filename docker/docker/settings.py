@@ -69,7 +69,7 @@ WSGI_APPLICATION = 'docker.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('POSTGRES_DATABASE', 'postgres'),
+        'NAME': os.environ.get('POSTGRES_DATABASE', 'treiding'),
         'USER': os.environ.get('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.environ.get('POSTGRES_PASSWORD', '286226'),
         'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
@@ -175,4 +175,4 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_PORT = os.environ.get("EMAIL_PORT")
 
-
+AUTH_USER_MODEL = "docker_admin.User"

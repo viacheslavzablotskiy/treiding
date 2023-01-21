@@ -3,7 +3,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView,
 
 from docker_admin.views import *
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+
+from docker_admin import views
 
 router = routers.DefaultRouter()
 router.register(r"api", ItemViewSet, basename="list_ap"),
@@ -14,9 +16,11 @@ router.register(r"Offer", Offer_offer),
 router.register(r"trade", Trade_trade),
 router.register(r"inventory", Inventory_inventory),
 router.register(r"balance/", Balance_balance),
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/login/', include("rest_framework.urls")),
+    path('^verify/(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/$', views.verify, name="verify"),
+    path('api/log/', include("rest_framework.urls")),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
