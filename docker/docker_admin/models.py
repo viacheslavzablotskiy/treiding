@@ -130,10 +130,10 @@ class Balance(models.Model):
     def __str__(self):
         return f"{self.balance}"
 
-    # @receiver(post_save, sender=User)
-    # def create_user_balance(sender, instance, created, **kwargs):
-    #     if created:
-    #         Balance.objects.create(user=instance, balance=0)
+    @receiver(post_save, sender=User)
+    def create_user_balance(sender, instance, created, **kwargs):
+        if created:
+            Balance.objects.create(user=instance, balance=0)
 
 
 class Trade(models.Model):
@@ -169,8 +169,8 @@ class Inventory(models.Model):
     def __str__(self):
         return f'{self.user} + {self.quantity} + {self.item_1}'
     #
-    # @receiver(post_save, sender=User)
-    # def create_user_balance(sender, instance, created, **kwargs):
-    #     if created:
-    #         p = Item.objects.first()
-    #         Inventory.objects.create(user=instance, item_1=p, quantity=0)
+    @receiver(post_save, sender=User)
+    def create_user_balance(sender, instance, created, **kwargs):
+        if created:
+            p = Item.objects.first()
+            Inventory.objects.create(user=instance, item_1=p, quantity=0)
