@@ -1,16 +1,45 @@
 from __future__ import absolute_import, unicode_literals
+
+import logging
+from time import sleep
+
 from celery import shared_task, Celery
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.urls import reverse
+from docker.celery import app
+
+
+@app.task
+def send_verification_email(user_id):
+    UserModel = get_user_model()
+    try:
+        user = UserModel.objects.get(pk=user_id)
+        send_mail(
+            'Verify your QuickPublisher account',
+            'Follow this link to verify your account: '
+            'http://localhost:8000%s' % reverse('verify', kwargs={'uuid': str(user.verification_uuid)}),
+            'zlava.mag@gmial.com',
+            [user.email],
+            fail_silently=False,
+        )
+    except UserModel.DoesNotExist:
+        logging.warning("Tried to send verification email to non-existing user '%s'" % user_id)
 
 
 @shared_task
 def price():
     from docker_admin.models import Trade, Item
     p = list(Trade.objects.all().order_by("price_total_1"))
-    p = p[-1]
-    g = list(Item.objects.all())
-    g = g[0]
-    g.max_price = p.price_total_1
-    g.save()
+    if p:
+        p = p[-1]
+        g = list(Item.objects.all())
+        g = g[0]
+        g.max_price = p.price_total_1
+        g.save()
+    else:
+        print('не было не одной покупки')
 
 
 @shared_task

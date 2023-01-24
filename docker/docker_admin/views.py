@@ -1,9 +1,23 @@
-from rest_framework import mixins, viewsets
+from django.http import Http404
+from rest_framework import mixins, viewsets, permissions
 from rest_framework.permissions import IsAuthenticated
 
-from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly
+from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly, AdminOrReadOnly
 from .serializers import *
 from docker_admin.models import *
+import uuid
+from django.shortcuts import HttpResponse, redirect
+
+
+def verify(request, uuid):
+    try:
+        user = User.objects.get(verification_uuid=uuid, is_verified=False)
+    except User.DoesNotExist:
+        raise Http404("User does not exist or is already verified")
+
+    user.is_verified = True
+    user.save()
+    return HttpResponse("добро пожаловать ")
 
 
 class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -39,11 +53,11 @@ class WatchList_watchlist(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixi
         return WatchList.objects.filter(user=user.id)
 
 
-class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                  mixins.CreateModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet):
+class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin,
+                  mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializers
-    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
+    permission_classes = (AdminOrReadOnly, IsOwnerOrReadOnly)
 
 
 class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
@@ -70,4 +84,4 @@ class Balance_balance(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets
 
     def get_queryset(self):
         user = self.request.user
-        return Balans.objects.filter(user=user.id)
+        return Balance.objects.filter(user=user.id)
