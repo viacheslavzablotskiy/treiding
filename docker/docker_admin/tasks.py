@@ -43,23 +43,23 @@ def send_verification_email(user_id):
             print('не было не одной покупки')
 
 
-class Procces:
+class Trade:
     @classmethod
-    def look_offer_to_sell(cls):
+    def offer_for_buyers(cls):
         from docker_admin.models import Trade, Offer
         offer_buy_offer = list(Offer.objects.filter(type_function=1, is_activate=True))
         offer_is_buy = offer_buy_offer
         if offer_is_buy:
             for offer_buy in offer_is_buy:
-                cls.balance_offer_buy_and_sell(offer_buy=offer_buy)
-                cls.offer_edit(offer_buy=offer_buy)
-                cls.offer_edit_1(offer_buy=offer_buy)
+                cls.job_after_trade_1(offer_buy=offer_buy)
+                cls.job_after_trade_2(offer_buy=offer_buy)
+                cls.job_after_trade_3(offer_buy=offer_buy)
                 offer_seller = list(Offer.objects.filter(type_function=2, is_activate=True, price__gte=offer_buy.price))
                 if offer_seller:
                     offer_seller = offer_seller[0]
-                    cls.offer_edit(offer_seller=offer_seller)
-                    cls.balance_offer_buy_and_sell(offer_seller=offer_seller)
-                    cls.offer_edit_1(offer_seller=offer_seller)
+                    cls.job_after_trade_2(offer_seller=offer_seller)
+                    cls.job_after_trade_1(offer_seller=offer_seller)
+                    cls.job_after_trade_3(offer_seller=offer_seller)
                     Trade.objects.create(client=offer_buy.user, client_offer=offer_buy.offer,
                                          quantity_client=offer_buy.quantity,
                                          price_total=offer_buy.total_price_is_offer,
@@ -69,7 +69,7 @@ class Procces:
                                          price_total_1=offer_seller.total_price_is_offer)
 
     @classmethod
-    def balance_offer_buy_and_sell(cls, offer_buy, offer_seller):
+    def job_after_trade_1(cls, offer_buy, offer_seller):
         from docker_admin.models import Balance, Inventory, Offer, Trade
         balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
         balance_offer_buy = balance_offer_buy[0]
@@ -158,7 +158,7 @@ class Procces:
                             offer_buy.save()
 
     @classmethod
-    def offer_edit(cls, offer_buy, offer_seller):
+    def job_after_trade_2(cls, offer_buy, offer_seller):
         from docker_admin.models import Offer, Trade, Inventory, Balance
         balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
         balance_offer_buy = balance_offer_buy[0]
@@ -186,7 +186,7 @@ class Procces:
             inventory_offer_sell.save()
 
     @classmethod
-    def offer_edit_1(cls, offer_buy, offer_seller):
+    def job_after_trade_3(cls, offer_buy, offer_seller):
         from docker_admin.models import Offer, Trade, Inventory, Balance
         balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
         balance_offer_buy = balance_offer_buy[0]

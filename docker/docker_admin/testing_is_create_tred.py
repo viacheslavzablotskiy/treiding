@@ -17,6 +17,7 @@ class A:
         cls.mass(p=offer)
 
 
+
     @classmethod
     def mass(cls, p):
         return p
