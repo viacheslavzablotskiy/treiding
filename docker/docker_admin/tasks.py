@@ -10,18 +10,23 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.urls import reverse
+from rest_framework.authtoken.models import Token
+
 from docker.celery import app
 
 
 @app.task
 def send_verification_email(user_id):
-    UserModel = get_user_model()
+    global UserModel
     try:
+        UserModel = get_user_model()
         user = UserModel.objects.get(pk=user_id)
+        user_token = list(Token.objects.filter(user=user))
+        user_token = user_token[0]
         send_mail(
             'Verify your QuickPublisher account',
             'Follow this link to verify your account: '
-            'http://localhost:8000%s' % reverse('verify', kwargs={'uuid': str(user.verification_uuid)}),
+            'http://localhost:8000%s' % reverse('verify', kwargs={'key': str(user_token.key)}),
             'zlava.mag@gmial.com',
             [user.email],
             fail_silently=False,

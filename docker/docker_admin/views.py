@@ -1,3 +1,4 @@
+
 from django.http import Http404
 from rest_framework import mixins, viewsets, permissions
 from rest_framework.permissions import IsAuthenticated
@@ -9,15 +10,17 @@ import uuid
 from django.shortcuts import HttpResponse, redirect
 
 
-def verify(request, uuid):
+def verify(request, key):
     try:
-        user = User.objects.get(verification_uuid=uuid, is_verified=False)
-    except User.DoesNotExist:
+        token = Token.objects.get(key=key)
+        user = User.objects.get(id=token.user_id)
+    except User.DoesNotExist or Token.DoesNotExist:
         raise Http404("User does not exist or is already verified")
-
-    user.is_verified = True
-    user.save()
-    return HttpResponse("добро пожаловать ")
+    # user.is_verified = False
+    # user.save()
+    token.user.is_verified = True
+    token.user.save()
+    return HttpResponse(f"добро пожаловать, твой токен {token.key}")
 
 
 class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

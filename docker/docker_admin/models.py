@@ -1,3 +1,7 @@
+from datetime import timedelta, datetime
+
+import jwt
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
@@ -5,6 +9,8 @@ from django.contrib.auth.models import User, PermissionsMixin
 from django.db.models import signals
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+
 from docker_admin.tasks import send_verification_email
 import uuid
 
@@ -49,7 +55,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField('staff status', default=False)
     is_active = models.BooleanField('active', default=True)
     is_verified = models.BooleanField('verified', default=False)  # Add the `is_verified` flag
-    verification_uuid = models.UUIDField('Unique Verification UUID', default=uuid.uuid4)
 
     def get_short_name(self):
         return self.email
@@ -60,6 +65,47 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __unicode__(self):
         return self.email
 
+    # @property
+    # def token(self):
+    #     """
+    #     Allows us to get a user's token by calling `user.token` instead of
+    #     `user.generate_jwt_token().
+    #
+    #     The `@property` decorator above makes this possible. `token` is called
+    #     a "dynamic property".
+    #     """
+    #     return self._generate_jwt_token()
+    #
+    # def get_full_name(self):
+    #     """
+    #     This method is required by Django for things like handling emails.
+    #     Typically this would be the user's first and last name. Since we do
+    #     not store the user's real name, we return their username instead.
+    #     """
+    #     return self.full_name
+    #
+    # def get_short_name(self):
+    #     """
+    #     This method is required by Django for things like handling emails.
+    #     Typically, this would be the user's first name. Since we do not store
+    #     the user's real name, we return their username instead.
+    #     """
+    #     return self.full_name
+    #
+    # def _generate_jwt_token(self):
+    #     """
+    #     Generates a JSON Web Token that stores this user's ID and has an expiry
+    #     date set to 60 days into the future.
+    #     """
+    #     dt = datetime.now() + timedelta(days=60)
+    #
+    #     token = jwt.encode({
+    #         'id': self.pk,
+    #         'exp': dt.utcfromtimestamp(dt.timestamp())
+    #     }, settings.SECRET_KEY, algorithm='HS256')
+    #
+    #     return token.decode('utf-8')
+
 
 class CodeName(models.Model):
     code = models.CharField(max_length=255, null=True, unique=True)
@@ -68,12 +114,19 @@ class CodeName(models.Model):
     def __str__(self):
         return f'{self.name}:{self.code}'
 
-    # def user_post_save(sender, instance, signal, *args, **kwargs):
-    #     if not instance.is_verified:
-    #         # Send verification email
-    #         send_verification_email.delay(instance.pk)
-    #
-    # signals.post_save.connect(user_post_save, sender=User)
+    def user_post_save(sender, instance, signal, *args, **kwargs):
+        if not instance.is_verified:
+            # Send verification email
+            send_verification_email.delay(instance.pk)
+
+    signals.post_save.connect(user_post_save, sender=User)
+
+
+    def user_token_verified(sender, instance, signal, *args, **kwargs):
+        if not instance.is_verified:
+            Token.objects.create(user=instance)
+
+    signals.post_save.connect(user_token_verified, sender=User)
 
 
 class Currency(models.Model):
@@ -168,6 +221,7 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f'{self.user} + {self.quantity} + {self.item_1}'
+
     #
     @receiver(post_save, sender=User)
     def create_user_balance(sender, instance, created, **kwargs):

@@ -19,7 +19,7 @@ router.register(r"balance/", Balance_balance),
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('verify/(?P<uuid>[a-z0-9\-]+)/', views.verify, name="verify"),
+    path('verify/(?P<key>[a-z0-9\-]+)/', views.verify, name="verify"),
     path('api/log/', include("rest_framework.urls")),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
