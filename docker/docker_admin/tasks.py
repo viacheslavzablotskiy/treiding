@@ -48,23 +48,23 @@ def send_verification_email(user_id):
             print('не было не одной покупки')
 
 
-class Trade:
+class Make_trades:
     @classmethod
-    def offer_for_buyers(cls):
+    def I_am_looking_for_seller_for_buyers_and_make_trade_(cls):
         from docker_admin.models import Trade, Offer
         offer_buy_offer = list(Offer.objects.filter(type_function=1, is_activate=True))
         offer_is_buy = offer_buy_offer
         if offer_is_buy:
             for offer_buy in offer_is_buy:
-                cls.job_after_trade_1(offer_buy=offer_buy)
-                cls.job_after_trade_2(offer_buy=offer_buy)
-                cls.job_after_trade_3(offer_buy=offer_buy)
+                cls.if_the_buyer_has_more_(offer_buy=offer_buy)
+                cls.if_the_seller_has_more(offer_buy=offer_buy)
+                cls.is_the_buyer_and_the_seller_have_equal_(offer_buy=offer_buy)
                 offer_seller = list(Offer.objects.filter(type_function=2, is_activate=True, price__gte=offer_buy.price))
                 if offer_seller:
                     offer_seller = offer_seller[0]
-                    cls.job_after_trade_2(offer_seller=offer_seller)
-                    cls.job_after_trade_1(offer_seller=offer_seller)
-                    cls.job_after_trade_3(offer_seller=offer_seller)
+                    cls.if_the_buyer_has_more_(offer_seller=offer_seller)
+                    cls.if_the_seller_has_more(offer_seller=offer_seller)
+                    cls.is_the_buyer_and_the_seller_have_equal_(offer_seller=offer_seller)
                     Trade.objects.create(client=offer_buy.user, client_offer=offer_buy.offer,
                                          quantity_client=offer_buy.quantity,
                                          price_total=offer_buy.total_price_is_offer,
@@ -74,7 +74,7 @@ class Trade:
                                          price_total_1=offer_seller.total_price_is_offer)
 
     @classmethod
-    def job_after_trade_1(cls, offer_buy, offer_seller):
+    def if_the_buyer_has_more_(cls, offer_buy, offer_seller):
         from docker_admin.models import Balance, Inventory, Offer, Trade
         balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
         balance_offer_buy = balance_offer_buy[0]
@@ -163,7 +163,7 @@ class Trade:
                             offer_buy.save()
 
     @classmethod
-    def job_after_trade_2(cls, offer_buy, offer_seller):
+    def if_the_seller_has_more(cls, offer_buy, offer_seller):
         from docker_admin.models import Offer, Trade, Inventory, Balance
         balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
         balance_offer_buy = balance_offer_buy[0]
@@ -191,7 +191,7 @@ class Trade:
             inventory_offer_sell.save()
 
     @classmethod
-    def job_after_trade_3(cls, offer_buy, offer_seller):
+    def is_the_buyer_and_the_seller_have_equal_(cls, offer_buy, offer_seller):
         from docker_admin.models import Offer, Trade, Inventory, Balance
         balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
         balance_offer_buy = balance_offer_buy[0]

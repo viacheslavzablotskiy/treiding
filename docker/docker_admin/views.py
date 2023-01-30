@@ -62,6 +62,18 @@ class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Creat
     serializer_class = OfferSerializers
     permission_classes = (AdminOrReadOnly, IsOwnerOrReadOnly)
 
+    # def post(self, request):
+    #     user = request.user
+    #     try:
+    #         if request.method == "POST":
+    #             p = Inventory.objects.get(user=user.id)
+    #             s = Offer.objects.
+
+
+
+
+
+
 
 class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Trade.objects.all()
