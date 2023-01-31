@@ -141,14 +141,7 @@ class Balance(models.Model):
     def __str__(self):
         return f"{self.balance}"
 
-    # @receiver(post_save, sender=Offer)
-    # def create_user_balance(sender, instance, created, **kwargs):
-    #     if created:
-    #         s = Inventory.objects.get(user=instance)
-    #         offer = Offer.objects.get(user = instance)
-    #         if s.quantity < offer.quantity:
-    #             offer.is_activate = False
-    #             offer.save()
+
 
 
     @receiver(post_save, sender=User)
@@ -182,6 +175,12 @@ class Trade(models.Model):
         return f'{self.client} +{self.client_offer}+{self.quantity_client}+{self.price_total}+{self.seller}' \
                f'+{self.seller_offer}+{self.quantity_seller}+{self.price_total_1} '
 
+    @receiver(post_save, sender=User)
+    def create_user_balance(sender, instance, created, **kwargs):
+        if created:
+            p = Item.objects.first()
+            Inventory.objects.create(user=instance, item_1=p, quantity=0)
+
 
 class Inventory(models.Model):
     user = models.ForeignKey(get_user_model(), null=True, blank=True, on_delete=models.CASCADE)
@@ -193,8 +192,16 @@ class Inventory(models.Model):
         return f'{self.user} + {self.quantity} + {self.item_1}'
 
     #
-    @receiver(post_save, sender=User)
-    def create_user_balance(sender, instance, created, **kwargs):
-        if created:
-            p = Item.objects.first()
-            Inventory.objects.create(user=instance, item_1=p, quantity=0)
+    # @receiver(post_save, sender=Offer)
+    # def create_user_balance(sender,  instance, created, **kwargs):
+    #     if created:
+    #         s = Inventory.objects.create(quantity=0)
+    #         p = Offer.objects.filter(user=s.user)
+    #         if p.quantity > s.quantity and p.type_function == 2:
+    #             p.quantity = s.quantity - p.quantity
+    #             instance.save()
+    #         else:
+    #             p.is_activate = False
+    #             p.save()
+
+
