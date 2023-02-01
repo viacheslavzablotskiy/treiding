@@ -6,10 +6,10 @@ import django
 django.setup()
 
 
-def matrix(a, b):
-    s = a + b
-    most(v=a, f=b)
-    return most(f=a, v=b)
+def matrix(a):
+    s = a * 3
+    if s > 1:
+        return most(f=5, v=3)
 
 
 def most(f, v):
@@ -17,4 +17,7 @@ def most(f, v):
     return g
 
 
-print(matrix(2, 3))
+print(matrix(5))
+
+
+
