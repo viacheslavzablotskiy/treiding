@@ -4,18 +4,13 @@ import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-from django.db import models
+
 from django.contrib.auth.models import User, PermissionsMixin
 from django.db.models import signals
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
-
-from docker_admin.tasks import send_verification_email
-import uuid
-
 from django.db import models
-import uuid
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class UserAccountManager(BaseUserManager):
@@ -56,14 +51,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField('active', default=True)
     is_verified = models.BooleanField('verified', default=False)  # Add the `is_verified` flag
 
-    def get_short_name(self):
-        return self.email
+    def access_token(self):
+        return str(RefreshToken.for_user(self).access_token)
 
-    def get_full_name(self):
-        return self.email
+    def refresh_token(self):
+        return str(RefreshToken.for_user(self))
 
-    def __unicode__(self):
-        return self.email
+    def __str__(self):
+        return f"{self.email}"
 
 
 class CodeName(models.Model):
@@ -72,19 +67,6 @@ class CodeName(models.Model):
 
     def __str__(self):
         return f'{self.name}:{self.code}'
-
-    def user_post_save(sender, instance, signal, *args, **kwargs):
-        if not instance.is_verified:
-            # Send verification email
-            send_verification_email.delay(instance.pk)
-
-    signals.post_save.connect(user_post_save, sender=User)
-
-    def user_token_verified(sender, instance, signal, *args, **kwargs):
-        if not instance.is_verified:
-            Token.objects.create(user=instance)
-
-    signals.post_save.connect(user_token_verified, sender=User)
 
 
 class Currency(models.Model):
@@ -141,15 +123,10 @@ class Balance(models.Model):
     def __str__(self):
         return f"{self.balance}"
 
-
-
-
     @receiver(post_save, sender=User)
     def create_user_balance(sender, instance, created, **kwargs):
         if created:
             Balance.objects.create(user=instance, balance=0)
-
-
 
 
 class Trade(models.Model):
@@ -190,18 +167,3 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f'{self.user} + {self.quantity} + {self.item_1}'
-
-    #
-    # @receiver(post_save, sender=Offer)
-    # def create_user_balance(sender,  instance, created, **kwargs):
-    #     if created:
-    #         s = Inventory.objects.create(quantity=0)
-    #         p = Offer.objects.filter(user=s.user)
-    #         if p.quantity > s.quantity and p.type_function == 2:
-    #             p.quantity = s.quantity - p.quantity
-    #             instance.save()
-    #         else:
-    #             p.is_activate = False
-    #             p.save()
-
-

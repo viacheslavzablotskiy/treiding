@@ -1,32 +1,45 @@
-
 from django.http import Http404
-from rest_framework import mixins, viewsets, permissions
-from rest_framework.permissions import IsAuthenticated
-
+from rest_framework import mixins, viewsets, permissions, status
+from rest_framework.decorators import api_view
+from rest_framework.generics import GenericAPIView
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly, AdminOrReadOnly
 from .serializers import *
 from docker_admin.models import *
-import uuid
 from django.shortcuts import HttpResponse, redirect
 
 
-def verify(request, key):
-    try:
-        token = Token.objects.get(key=key)
-        user = User.objects.get(id=token.user_id)
-    except User.DoesNotExist or Token.DoesNotExist:
-        raise Http404("User does not exist or is already verified")
-    # user.is_verified = False
-    # user.save()
-    token.user.is_verified = True
-    token.user.save()
-    return HttpResponse(f"добро пожаловать, твой токен {token.key}")
+class Register_user(APIView):
+    permission_classes = [AllowAny, ]
+    serializer_class = Register
+
+    def post(self, request: Request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class Register_token_in_the_views(mixins.ListModelMixin, viewsets.GenericViewSet):
+    queryset = OutstandingToken.objects.all()
+    serializer_class = Register_token_in_the_account
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthenticated, IsOwnerOrReadOnly, AdminOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        user.is_verified = True
+        user.save()
+        return OutstandingToken.objects.filter(user=user)
 
 
 class ItemViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = CodeName.objects.all()
     serializer_class = CodeNameSerializer
-    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated,
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsAuthenticated,
                           IsAdminOrReadOnly,)
 
 
@@ -40,7 +53,7 @@ class Currency(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Generi
 class Item_table(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
-    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated,
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsAuthenticated,
                           IsAdminOrReadOnly,)
 
 
@@ -49,7 +62,7 @@ class WatchList_watchlist(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixi
                           viewsets.GenericViewSet):
     queryset = WatchList.objects.all()
     serializer_class = WatchListSerializers
-    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated,)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
@@ -60,32 +73,21 @@ class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Creat
                   mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializers
-    permission_classes = (AdminOrReadOnly, IsOwnerOrReadOnly)
-
-    # def post(self, request):
-    #     user = request.user
-    #     try:
-    #         if request.method == "POST":
-    #             p = Inventory.objects.get(user=user.id)
-    #             s = Offer.objects.
-
-
-
-
+    permission_classes = (IsAuthenticatedOrReadOnly, AdminOrReadOnly, IsOwnerOrReadOnly)
 
 
 
 class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Trade.objects.all()
     serializer_class = TradeSerializers
-    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
 
 
 class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin,
                           viewsets.GenericViewSet):
     queryset = Inventory.objects.all()
     serializer_class = InventorySerializers
-    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
 
     def get_queryset(self):
         user = self.request.user
@@ -95,7 +97,7 @@ class Inventory_inventory(mixins.ListModelMixin, mixins.RetrieveModelMixin,
 class Balance_balance(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     queryset = Balance.objects.all()
     serializer_class = BalanceSerializers
-    permission_classes = (IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly, IsAdminOrReadOnly, IsAuthenticated)
 
     def get_queryset(self):
         user = self.request.user

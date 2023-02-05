@@ -1,5 +1,31 @@
+from typing import Dict
+
+from django.contrib.auth import authenticate
 from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import OutstandingToken
 from .models import *
+
+
+class Register(serializers.ModelSerializer):
+    password = serializers.CharField(max_length=100, write_only=True)
+    access_token = serializers.CharField(max_length=100, read_only=True)
+    refresh_token = serializers.CharField(max_length=100, read_only=True)
+
+    class Meta:
+        model = User
+        fields = ("email", "password", "access_token", "refresh_token")
+        # extra_kwargs = {"password": {"write_only": True}, "access_token": {"read_only": True},
+        #                 "refresh_token": {"read_only": True}}
+
+    def create(self, validated_data: Dict):
+        return User.objects.create_user(**validated_data)
+
+
+class Register_token_in_the_account(serializers.ModelSerializer):
+    class Meta:
+        model = OutstandingToken
+        fields = "__all__"
 
 
 class CodeNameSerializer(serializers.ModelSerializer):
@@ -56,5 +82,3 @@ class BalanceSerializers(serializers.ModelSerializer):
     class Meta:
         model = Balance
         fields = "__all__"
-
-

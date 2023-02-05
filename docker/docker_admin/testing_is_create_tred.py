@@ -17,7 +17,7 @@ def most(f, v):
     return g
 
 
-print(matrix(5))
+print(matrix(2))
 
 
 
