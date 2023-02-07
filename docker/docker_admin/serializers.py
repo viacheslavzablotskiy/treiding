@@ -56,10 +56,40 @@ class WatchListSerializers(serializers.ModelSerializer):
 
 class OfferSerializers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    # title = InventorySerializers()
 
     class Meta:
         model = Offer
-        fields = '__all__'
+        fields = "__all__"
+
+    # def create(self, validated_data):
+    #     # title = InventorySerializers()
+    #     try:
+    #         offer = Offer(user=validated_data["user"],
+    #                       item=validated_data["item"],
+    #                       price=validated_data["price"]
+    #                       total_price_is_offer=validated_data["total_price_is_offer"],
+    #                       is_activate=validated_data["is_activate"],
+    #                     )
+    #         inventory = Inventory.objects.get(user=offer.user)
+    #         if offer.quantity < inventory.quantity:
+    #             offer.save(validated_data)
+    #     except ValueError:
+    #         print("you does not can to create because ")
+    #     return offer
+
+    # class UserSerializer(serializers.ModelSerializer):
+    #     profile = ProfileSerializer()
+    #
+    #     class Meta:
+    #         model = User
+    #         fields = ('username', 'email', 'profile')
+    #
+    #     def create(self, validated_data):
+    #         profile_data = validated_data.pop('profile')
+    #         user = User.objects.create(**validated_data)
+    #         Profile.objects.create(user=user, **profile_data)
+    #         return user
 
 
 class TradeSerializers(serializers.ModelSerializer):

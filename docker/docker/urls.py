@@ -4,7 +4,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenVerifyView,
 from docker_admin.views import *
 from django.contrib import admin
 from django.urls import path, include
-
 from docker_admin import views
 
 router = routers.DefaultRouter()
@@ -24,7 +23,7 @@ urlpatterns = [
     path("register/", views.Register_user.as_view(), name="create-user"),
     # path("token/", views.Register_token_in_the_views.as_view({'get': 'get_rank'}), name="token"),
     # path("login/", views.User_sees_him_token.as_view(), name="login-user"),
-    # path('verify/(?P<key>[a-z0-9\-]+)/', views.verify, name="verify"),
+    path('message/(?P<token>[a-z0-9-]+)/', verify, name="message"),
     # path("token/", views.Register_in_the_blacklist.as_view(), name="token-list"),
     # path('api/login/', include("rest_framework.urls")),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain'),

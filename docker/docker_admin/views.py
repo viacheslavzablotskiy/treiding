@@ -1,5 +1,5 @@
 from django.http import Http404
-from rest_framework import mixins, viewsets, permissions, status
+from rest_framework import mixins, viewsets, permissions, status, request
 from rest_framework.decorators import api_view
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
@@ -11,6 +11,16 @@ from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly, AdminOrReadOnly
 from .serializers import *
 from docker_admin.models import *
 from django.shortcuts import HttpResponse, redirect
+
+
+def verify(request, token):
+    try:
+        token = OutstandingToken.objects.get(token=token)
+        token.user.is_verified = True
+        token.user.save()
+    except User.DoesNotExist:
+        raise Http404("User does not exist or is already verified")
+    return HttpResponse(f"Tank you {token} ")
 
 
 class Register_user(APIView):
@@ -29,10 +39,20 @@ class Register_token_in_the_views(mixins.ListModelMixin, viewsets.GenericViewSet
     serializer_class = Register_token_in_the_account
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthenticated, IsOwnerOrReadOnly, AdminOrReadOnly]
 
+    # def time(self):
+    #     user = self.request.user
+    #     time = datetime.now()
+    #     token = list(OutstandingToken.objects.filter(user=user))
+    #     for tok in token:
+    #         if tok.expires_at == time:
+    #             tok.delete()
+    #             user.is_verified = False
+    #             user.save()
+
     def get_queryset(self):
         user = self.request.user
-        user.is_verified = True
-        user.save()
+        # user.is_verified = True
+        # user.save()
         return OutstandingToken.objects.filter(user=user)
 
 
@@ -75,6 +95,13 @@ class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Creat
     serializer_class = OfferSerializers
     permission_classes = (IsAuthenticatedOrReadOnly, AdminOrReadOnly, IsOwnerOrReadOnly)
 
+    # @api_view(['GET', 'POST'])
+    # def matrix(self):
+    #     if request.method == 'POST':
+    #         serializer = OfferSerializers(data=request.data)
+    #             if serializer.is_valid():
+    #                 serializer.save()
+    #                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class Trade_trade(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):

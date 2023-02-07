@@ -4,20 +4,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "docker.settings")
 import django
 
 django.setup()
-
-
-def matrix(a):
-    s = a * 3
-    if s > 1:
-        return most(f=5, v=3)
-
-
-def most(f, v):
-    g = f + v
-    return g
-
-
-print(matrix(2))
-
-
-
+from datetime import datetime, timedelta
+from docker_admin.models import User
+from rest_framework_simplejwt.tokens import OutstandingToken
+t = datetime.now()
+p = list(User.objects.all())
+p = p[-1]
+s = OutstandingToken.objects.create(user=p, created_at=t, expires_at=timedelta(days=1))
+print(s)
