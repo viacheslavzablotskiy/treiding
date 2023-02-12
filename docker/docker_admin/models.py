@@ -10,6 +10,7 @@ from django.db.models import signals
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
@@ -108,8 +109,15 @@ class Offer(models.Model):
     is_activate = models.BooleanField(default=True)
     is_locked = models.BooleanField(default=True)
 
+    # первый и самый простой спопсоб недосстатка бадланса или количетсва на счету
     def save(self, *args, **kwargs):
         self.total_price_is_offer = self.quantity * self.price
+        inventory = Inventory.objects.get(user=self.user)
+        balance = Balance.objects.get(user=self.user)
+        if self.quantity > inventory.quantity and self.type_function == 2:
+            raise ValidationError("you don't have required amount")
+        elif self.total_price_is_offer > balance.balance and self.type_function == 1:
+            raise ValidationError("you don't have required balance")
         super(Offer, self).save(*args, **kwargs)
 
     def __str__(self):

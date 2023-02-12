@@ -11,7 +11,7 @@ from rest_framework.authtoken.models import Token
 from docker.celery import app
 from docker_admin.models import Trade, Item, User, Balance, Inventory, Offer
 
-
+#второй способ реализации недостатка баланса и количетсва акций на твоем счете
 @shared_task
 def create_offer():
     offer_sell = list(Offer.objects.filter(type_function=2, is_activate=True, is_locked=True))
@@ -120,7 +120,7 @@ class Trading:
                                             the_first_offer_seller
                                             =the_first_offer_seller
                                             )
-        return offer_buy, the_first_offer_seller
+
 
     @classmethod
     def if_a_first_offer_not_covers(cls, offer_buy, the_first_offer_seller):
@@ -166,7 +166,7 @@ class Trading:
         inventory_offer.save()
         offer_sell_if_the_first_offer_sell_not_covers.save()
         offer_buy.save()
-        return offer_buy, offer_sell_if_the_first_offer_sell_not_covers
+
 
     @classmethod
     def the_offer_seller_2_has_more(cls, offer_sell_if_the_first_offer_sell_not_covers, offer_buy, balance_offer,
@@ -192,7 +192,7 @@ class Trading:
         inventory_offer_sell.save()
         offer_sell_if_the_first_offer_sell_not_covers.save()
         offer_buy.save()
-        return offer_buy, offer_sell_if_the_first_offer_sell_not_covers
+
 
     @classmethod
     def the_offer_seller_2_and_offer_buy_have_equal(cls, offer_sell_if_the_first_offer_sell_not_covers, offer_buy,
@@ -212,7 +212,7 @@ class Trading:
         inventory_offer.save()
         offer_sell_if_the_first_offer_sell_not_covers.save()
         offer_buy.save()
-        return offer_buy, offer_sell_if_the_first_offer_sell_not_covers
+
 
     @classmethod
     def changes_to_create_a_trade(cls,
@@ -261,7 +261,7 @@ class Trading:
         inventory_offer_sell.save()
         balance_offer_sell.save()
         balance_offer_buy.save()
-        return offer_buy, the_first_offer_seller
+
 
     @classmethod
     def the_seller_has_more(cls, offer_buy, the_first_offer_seller, balance_offer_buy, balance_offer_sell,
@@ -283,15 +283,15 @@ class Trading:
         balance_offer_buy.save()
         inventory_offer.save()
         inventory_offer_sell.save()
-        return offer_buy, the_first_offer_seller
+
 
     @classmethod
     def changes_job_a_trade(cls, offer_buy,
-                                                                                     the_first_offer_seller,
-                                                                                     balance_offer_buy,
-                                                                                     balance_offer_sell,
-                                                                                     inventory_offer,
-                                                                                     inventory_offer_sell):
+                            the_first_offer_seller,
+                            balance_offer_buy,
+                            balance_offer_sell,
+                            inventory_offer,
+                            inventory_offer_sell):
         if offer_buy.quantity > the_first_offer_seller.quantity:
             cls.if_the_buyer_has_more(offer_buy=offer_buy, the_first_offer_seller=the_first_offer_seller,
                                       balance_offer_sell=balance_offer_sell, balance_offer_buy=balance_offer_buy,

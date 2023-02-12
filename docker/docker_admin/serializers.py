@@ -2,6 +2,7 @@ from typing import Dict
 
 from django.contrib.auth import authenticate
 from rest_framework import serializers
+from rest_framework.pagination import PageNumberPagination
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.tokens import OutstandingToken
 from .models import *
@@ -54,13 +55,7 @@ class WatchListSerializers(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class OfferSerializers(serializers.ModelSerializer):
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    # title = InventorySerializers()
 
-    class Meta:
-        model = Offer
-        fields = "__all__"
 
     # def create(self, validated_data):
     #     # title = InventorySerializers()
@@ -108,7 +103,26 @@ class InventorySerializers(serializers.ModelSerializer):
 
 class BalanceSerializers(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
     class Meta:
         model = Balance
         fields = "__all__"
+
+
+class LargeResultsSetPagination(PageNumberPagination):
+    page_size = 1
+    page_size_query_param = 'page_size'
+    max_page_size = 10000
+
+
+class OfferSerializers(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+
+    class Meta:
+        model = Offer
+        fields = "__all__"
+
+    # def matrix(self):
+    #     if Inventory.quantity > Offer.quantity:
+    #         raise serializers.ValidationError('This field must be an even number.')
+    #     return False

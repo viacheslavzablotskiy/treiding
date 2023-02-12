@@ -1,6 +1,7 @@
 from django.http import Http404
-from rest_framework import mixins, viewsets, permissions, status, request
+from rest_framework import mixins, viewsets, permissions, status, request, filters
 from rest_framework.decorators import api_view
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
@@ -9,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 from .permissoins import IsOwnerOrReadOnly, IsAdminOrReadOnly, AdminOrReadOnly
 from .serializers import *
+from docker_admin.serializers import LargeResultsSetPagination
 from docker_admin.models import *
 from django.shortcuts import HttpResponse, redirect
 
@@ -93,7 +95,26 @@ class Offer_offer(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Creat
                   mixins.UpdateModelMixin, viewsets.GenericViewSet):
     queryset = Offer.objects.all()
     serializer_class = OfferSerializers
+    pagination_class = LargeResultsSetPagination
     permission_classes = (IsAuthenticatedOrReadOnly, AdminOrReadOnly, IsOwnerOrReadOnly)
+    filter_backends = [filters.OrderingFilter]
+    search_fields = ['price', 'type_function']
+
+    # def perform_create(self, serializer):
+    #     queryset = Offer.objects.filter(user=self.request.user)
+    #
+    #     if queryset.exists():
+    #         raise ValidationError('You have already signed up')
+    #     serializer.save(user=self.request.user)
+    # def post(self):
+    #     queryset = Offer.objects.filter(user=self.request.user).first()
+    #     inventory = Inventory.objects.get(user=self.request.user)
+    #     if queryset.quantity > inventory.quantity:
+    #         self.if_not_action(user=queryset.user)
+    #
+    #
+    # def if_not_action(self, user):
+    #     return HttpResponse(f"{user}ты не можешь создать поскольку у тебя недостаточно количетсва")
 
     # @api_view(['GET', 'POST'])
     # def matrix(self):

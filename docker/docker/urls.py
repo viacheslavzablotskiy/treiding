@@ -21,6 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/log/', include("rest_framework.urls")),
     path("register/", views.Register_user.as_view(), name="create-user"),
+
     # path("token/", views.Register_token_in_the_views.as_view({'get': 'get_rank'}), name="token"),
     # path("login/", views.User_sees_him_token.as_view(), name="login-user"),
     path('message/(?P<token>[a-z0-9-]+)/', verify, name="message"),
