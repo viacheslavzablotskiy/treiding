@@ -11,24 +11,27 @@ from rest_framework.authtoken.models import Token
 from docker.celery import app
 from docker_admin.models import Trade, Item, User, Balance, Inventory, Offer
 
-#второй способ реализации недостатка баланса и количетсва акций на твоем счете
+
 @shared_task
 def create_offer():
-    offer_sell = list(Offer.objects.filter(type_function=2, is_activate=True, is_locked=True))
+    offer_sell = list(Offer.objects.filter(type_function=2, is_activate=True))
     for offer in offer_sell:
         if not offer.is_activate:
             continue
         else:
             offer_buy_inventory = list(Inventory.objects.filter(user=offer.user))
-            offer_buy_inventory = offer_buy_inventory[0]
-            if offer.quantity > offer_buy_inventory.quantity:
-                offer.is_activate = False
-                offer.save()
-            else:
-                offer_buy_inventory.quantity = offer_buy_inventory.quantity - offer.quantity
-                offer.is_locked = False
-                offer_buy_inventory.save()
-                offer.save()
+            offer_buy_inventory.quantity = offer_buy_inventory.quantity - offer.quantity
+            offer_buy_inventory.save()
+            offer.save()
+            # offer_buy_inventory = offer_buy_inventory[0]
+            # if offer.quantity > offer_buy_inventory.quantity:
+            #     offer.is_activate = False
+            #     offer.save()
+            # else:
+            #     offer_buy_inventory.quantity = offer_buy_inventory.quantity - offer.quantity
+            #     offer.is_locked = False
+            #     offer_buy_inventory.save()
+            #     offer.save()
 
 
 @app.task
@@ -70,7 +73,7 @@ class Trading:
         if list_offer_buyer:
             for offer_buy in list_offer_buyer:
                 list_offer_seller = list(
-                    Offer.objects.filter(type_function=2, is_activate=True, is_locked=False,
+                    Offer.objects.filter(type_function=2, is_activate=True,
                                          price__gte=offer_buy.price))
                 the_first_offer_seller = list_offer_seller[0]
                 balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
