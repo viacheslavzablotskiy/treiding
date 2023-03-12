@@ -1,12 +1,6 @@
-from datetime import timedelta, datetime
-
-import jwt
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
-
 from django.contrib.auth.models import User, PermissionsMixin
-from django.db.models import signals
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db import models
@@ -110,6 +104,7 @@ class Offer(models.Model):
     is_locked = models.BooleanField(default=True)
 
     # первый и самый простой спопсоб недосстатка бадланса или количетсва на счету
+
     def save(self, *args, **kwargs):
         self.total_price_is_offer = self.quantity * self.price
         inventory = Inventory.objects.get(user=self.user)
