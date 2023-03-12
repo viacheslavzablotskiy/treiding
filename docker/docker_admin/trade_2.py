@@ -21,9 +21,9 @@ class Trading:
                 inventory_offer_sell = list(Inventory.objects.filter(user=first_offer_seller.user))
                 inventory_offer_sell = inventory_offer_sell[0]
                 if first_offer_seller and balance_offer_buy.balance > first_offer_seller.total_price_is_offer:
-                    cls._make_trade_(offer_buy=offer_buy, first_offer_seller=first_offer_seller,
-                                     balance_offer_sell=balance_offer_sell, balance_offer_buy=balance_offer_buy,
-                                     inventory_offer_buy=inventory_offer_buy, inventory_offer_sell=inventory_offer_sell)
+                    cls.make_trade_(offer_buy=offer_buy, first_offer_seller=first_offer_seller,
+                                    balance_offer_sell=balance_offer_sell, balance_offer_buy=balance_offer_buy,
+                                    inventory_offer_buy=inventory_offer_buy, inventory_offer_sell=inventory_offer_sell)
                 else:
                     continue
 
@@ -37,12 +37,12 @@ class Trading:
                              seller_offer=first_offer_seller,
                              quantity_seller=first_offer_seller.quantity,
                              price_total_1=first_offer_seller.total_price_is_offer)
-        cls._course_of_action(offer_buy=offer_buy,
-                              first_offer_seller=first_offer_seller,
-                              balance_offer_sell=balance_offer_sell,
-                              balance_offer_buy=balance_offer_buy,
-                              inventory_offer_buy=inventory_offer_buy,
-                              inventory_offer_sell=inventory_offer_sell)
+        cls.course_of_action(offer_buy=offer_buy,
+                             first_offer_seller=first_offer_seller,
+                             balance_offer_sell=balance_offer_sell,
+                             balance_offer_buy=balance_offer_buy,
+                             inventory_offer_buy=inventory_offer_buy,
+                             inventory_offer_sell=inventory_offer_sell)
 
     @classmethod
     def if_offer_buy_has_more(cls, offer_buy, first_offer_seller, balance_offer_sell, balance_offer_buy,
@@ -80,10 +80,10 @@ class Trading:
                                  seller_offer=offer_sell, quantity_seller=offer_sell.quantity,
                                  price_total_1=offer_sell.total_price_is_offer)
             cls.course_of_action_offer_sell_(offer_sell=offer_sell, offer_buy=offer_buy,
-                                              inventory_offer_sell=inventory_offer_sell,
-                                              inventory_offer_buy=inventory_offer_buy,
-                                              balance_offer_buy=balance_offer_buy,
-                                              balance_offer_sell=balance_offer_sell, )
+                                             inventory_offer_sell=inventory_offer_sell,
+                                             inventory_offer_buy=inventory_offer_buy,
+                                             balance_offer_buy=balance_offer_buy,
+                                             balance_offer_sell=balance_offer_sell, )
 
     @classmethod
     def the_offer_buy_has_more(cls, offer_sell, offer_buy, balance_offer_sell, balance_offer_buy, inventory_offer_sell,
@@ -208,9 +208,9 @@ class Trading:
         inventory_offer_sell.save()
 
     @classmethod
-    def _course_of_action(cls, offer_buy, first_offer_seller, balance_offer_buy, balance_offer_sell,
-                          inventory_offer_buy,
-                          inventory_offer_sell):
+    def course_of_action(cls, offer_buy, first_offer_seller, balance_offer_buy, balance_offer_sell,
+                         inventory_offer_buy,
+                         inventory_offer_sell):
         if offer_buy.quantity > first_offer_seller.quantity:
             cls.if_offer_buy_has_more(offer_buy=offer_buy, first_offer_seller=first_offer_seller,
                                       balance_offer_sell=balance_offer_sell, balance_offer_buy=balance_offer_buy,

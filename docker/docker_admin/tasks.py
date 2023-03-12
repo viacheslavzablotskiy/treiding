@@ -85,15 +85,15 @@ class Trading:
                 inventory_offer_sell = list(Inventory.objects.filter(user=first_offer_seller.user))
                 inventory_offer_sell = inventory_offer_sell[0]
                 if first_offer_seller and balance_offer_buy.balance > first_offer_seller.total_price_is_offer:
-                    cls._make_trade_(offer_buy=offer_buy, first_offer_seller=first_offer_seller,
-                                     balance_offer_sell=balance_offer_sell, balance_offer_buy=balance_offer_buy,
-                                     inventory_offer_buy=inventory_offer_buy, inventory_offer_sell=inventory_offer_sell)
+                    cls.make_trade_(offer_buy=offer_buy, first_offer_seller=first_offer_seller,
+                                    balance_offer_sell=balance_offer_sell, balance_offer_buy=balance_offer_buy,
+                                    inventory_offer_buy=inventory_offer_buy, inventory_offer_sell=inventory_offer_sell)
                 else:
                     continue
 
     @classmethod
-    def _make_trade_(cls, offer_buy, first_offer_seller, balance_offer_sell, balance_offer_buy, inventory_offer_buy,
-                     inventory_offer_sell):
+    def make_trade_(cls, offer_buy, first_offer_seller, balance_offer_sell, balance_offer_buy, inventory_offer_buy,
+                    inventory_offer_sell):
         Trade.objects.create(client=offer_buy.user, client_offer=offer_buy.offer,
                              quantity_client=offer_buy.quantity,
                              price_total=offer_buy.total_price_is_offer,
