@@ -1,154 +1,224 @@
 from __future__ import absolute_import, unicode_literals
-from celery import shared_task, Celery
+
+import logging
+
+from celery import shared_task
+from django.contrib.auth import get_user_model
+from rest_framework_simplejwt.tokens import OutstandingToken
+from django.core.mail import send_mail
+from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from docker.celery import app
+from docker_admin.models import Trade, Item, User, Balance, Inventory, Offer
 
 
 @shared_task
-def price():
-    from docker_admin.models import Trade, Item
+def create_offer():
+    offer_sell = list(Offer.objects.filter(type_function=2, is_activate=True))
+    for offer in offer_sell:
+        if not offer.is_activate:
+            continue
+        else:
+            offer_buy_inventory = list(Inventory.objects.filter(user=offer.user))
+            offer_buy_inventory.quantity = offer_buy_inventory.quantity - offer.quantity
+            offer_buy_inventory.save()
+            offer.save()
+            # offer_buy_inventory = offer_buy_inventory[0]
+            # if offer.quantity > offer_buy_inventory.quantity:
+            #     offer.is_activate = False
+            #     offer.save()
+            # else:
+            #     offer_buy_inventory.quantity = offer_buy_inventory.quantity - offer.quantity
+            #     offer.is_locked = False
+            #     offer_buy_inventory.save()
+            #     offer.save()
+
+
+@app.task
+def send_verification_email(user_id):
+    UserModel = get_user_model()
+    try:
+        user = UserModel.objects.get(pk=user_id)
+        token = list(OutstandingToken.objects.filter(user=user))
+        token = token[0]
+        send_mail(
+            'Verify your QuickPublisher account',
+            'Follow this link to verify your account: '
+            'http://localhost:8000%s' % reverse('message', kwargs={'token': str(token.token)}),
+            'zlava.mag@gmail.com',
+            [user.email],
+            fail_silently=False,
+        )
+    except UserModel.DoesNotExist:
+        logging.warning("Tried to send verification email to non-existing user '%s'" % user_id)
+
+
+@shared_task
+def more_price():
     p = list(Trade.objects.all().order_by("price_total_1"))
-    p = p[-1]
-    g = list(Item.objects.all())
-    g = g[0]
-    g.max_price = p.price_total_1
-    g.save()
+    if p:
+        p = p[-1]
+        g = list(Item.objects.all())
+        g = g[0]
+        g.max_price = p.price_total_1
+        g.save()
+    else:
+        print('не было не одной покупки')
 
 
-@shared_task
-def trade():
-    from docker_admin.models import Offer, Balance, Inventory, Trade
-    offer_buy = list(Offer.objects.filter(type_function=1, is_activate=True))
-    if offer_buy:
-        for offer in offer_buy:
-            offer_sell = list(Offer.objects.filter(type_function=2, price__lte=offer.price, is_activate=True))
-            if offer_sell:
-                offer_sell = offer_sell[0]
-                Trade.objects.create(client=offer.user, client_offer=offer, quantity_client=offer.quantity,
-                                     price_total=offer.total_price_is_offer, seller=offer_sell.user,
-                                     seller_offer=offer_sell,
-                                     quantity_seller=offer_sell.quantity,
-                                     price_total_1=offer_sell.total_price_is_offer)
-                inventory_offer = list(Inventory.objects.filter(user=offer.user))
-                inventory_offer = inventory_offer[0]
-                inventory_offer_sell = list(Inventory.objects.filter(user=offer_sell.user))
-                inventory_offer_sell = inventory_offer_sell[0]
-                balance_offer = list(Balance.objects.filter(user=offer.user))
-                balance_offer = balance_offer[0]
-                balance_offer_sell = list(Balance.objects.filter(user=offer_sell.user))
-                balance_offer_sell = balance_offer_sell[0]
-                if offer.quantity > offer_sell.quantity:
-                    offer_sell.is_activate = False
-                    balance_offer.balance -= offer_sell.total_price_is_offer
-                    balance_offer_sell.balance += offer_sell.total_price_is_offer
-                    inventory_offer.quantity += offer_sell.quantity
-                    inventory_offer_sell.quantity -= offer_sell.quantity
-                    offer.quantity -= offer_sell.quantity
-                    offer_sell.quantity -= offer_sell.quantity
-                    balance_offer_sell.save()
-                    balance_offer.save()
-                    inventory_offer_sell.save()
-                    inventory_offer.save()
-                    offer_sell.save()
-                    offer.save()
-                    if offer.is_activate and offer_sell:
-                        offer_sell = list(
-                            Offer.objects.filter(type_function=2, price__lte=offer.price, is_activate=True))
-                        for offer_1 in offer_sell:
-                            if not offer_1 or not offer.is_activate:
-                                break
-                            else:
-                                Trade.objects.create(client=offer.user, client_offer=offer,
-                                                     quantity_client=offer.quantity,
-                                                     price_total=offer.total_price_is_offer, seller=offer_1.user,
-                                                     seller_offer=offer_1,
-                                                     quantity_seller=offer_1.quantity,
-                                                     price_total_1=offer_1.total_price_is_offer)
-                                inventory_offer = list(Inventory.objects.filter(user=offer.user))
-                                inventory_offer = inventory_offer[0]
-                                inventory_offer_sell = list(Inventory.objects.filter(user=offer_1.user))
-                                inventory_offer_sell = inventory_offer_sell[0]
-                                balance_offer = list(Balance.objects.filter(user=offer.user))
-                                balance_offer = balance_offer[0]
-                                balance_offer_sell = list(Balance.objects.filter(user=offer_1.user))
-                                balance_offer_sell = balance_offer_sell[0]
-                                if offer.quantity > offer_1.quantity:
-                                    offer_1.is_activate = False
-                                    balance_offer.balance -= offer_1.total_price_is_offer
-                                    balance_offer_sell.balance += offer_1.total_price_is_offer
-                                    inventory_offer.quantity += offer_1.quantity
-                                    inventory_offer_sell.quantity -= offer_1.quantity
-                                    offer.quantity -= offer_1.quantity
-                                    offer_1.quantity -= offer_1.quantity
-                                    balance_offer_sell.save()
-                                    balance_offer.save()
-                                    inventory_offer_sell.save()
-                                    inventory_offer.save()
-                                    offer_1.save()
-                                    offer.save()
-                                elif offer.quantity < offer_1.quantity:
-                                    offer.is_activate = False
-                                    balance_offer.balance = balance_offer.balans - (
-                                            (offer_1.total_price_is_offer / offer_1.quantity) * offer.quantity)
-                                    balance_offer_sell.balance = balance_offer_sell.balans + (
-                                            (offer_1.total_price_is_offer / offer_1.quantity) * offer.quantity)
-                                    inventory_offer.quantity += offer.quantity
-                                    inventory_offer_sell.quantity -= offer.quantity
-                                    offer_1.quantity -= offer.quantity
-                                    offer.quantity -= offer.quantity
-                                    balance_offer_sell.save()
-                                    balance_offer.save()
-                                    inventory_offer.save()
-                                    inventory_offer_sell.save()
-                                    offer_1.save()
-                                    offer.save()
-                                elif offer.quantity == offer_1.quantity:
-                                    balance_offer.balance -= offer_1.total_price_is_offer
-                                    balance_offer_sell.balance += offer_1.total_price_is_offer
-                                    offer_1.is_activate = False
-                                    offer.is_activate = False
-                                    inventory_offer_sell.quantity -= offer.quantity
-                                    inventory_offer.quantity += offer_1.quantity
-                                    offer.quantity -= offer.quantity
-                                    offer_1.quantity -= offer_1.quantity
-                                    balance_offer_sell.save()
-                                    balance_offer.save()
-                                    inventory_offer_sell.save()
-                                    inventory_offer.save()
-                                    offer_1.save()
-                                    offer.save()
+class Trading:
+    @classmethod
+    def find_suitable_sell_offer_and_make_trade(cls):
+        list_offer_for_buyer = list(Offer.objects.filter(type_function=1, is_activate=True))
+        if list_offer_for_buyer:
+            for offer_buy in list_offer_for_buyer:
+                cls.find_required_offer_sell(offer_buy=offer_buy
+                                             )
+
+    @classmethod
+    def find_required_offer_sell(cls, offer_buy):
+        list_offer_seller = list(
+            Offer.objects.filter(type_function=2, is_activate=True, is_locked=False,
+                                 price__gte=offer_buy.price))
+        first_offer_seller = list_offer_seller[0]
+        balance_offer_buy = list(Balance.objects.filter(user=offer_buy.user))
+        balance_offer_buy = balance_offer_buy[0]
+        balance_offer_sell = list(Balance.objects.filter(user=first_offer_seller.user))
+        balance_offer_sell = balance_offer_sell[0]
+        inventory_offer_buy = list(Inventory.objects.filter(user=offer_buy.user))
+        inventory_offer_buy = inventory_offer_buy[0]
+        inventory_offer_sell = list(Inventory.objects.filter(user=first_offer_seller.user))
+        inventory_offer_sell = inventory_offer_sell[0]
+        if first_offer_seller and balance_offer_buy.balance > first_offer_seller.total_price_is_offer:
+            cls.make_trade_(offer_buy=offer_buy, first_offer_seller=first_offer_seller,
+                            balance_offer_sell=balance_offer_sell, balance_offer_buy=balance_offer_buy,
+                            inventory_offer_sell=inventory_offer_sell, inventory_offer_buy=inventory_offer_buy)
+        else:
+            offer_buy.activate = False
+            offer_buy.save()
+
+    @classmethod
+    def make_trade_(cls, offer_buy, first_offer_seller, balance_offer_buy, balance_offer_sell,
+                    inventory_offer_buy, inventory_offer_sell):
+        Trade.objects.create(client=offer_buy.user, client_offer=offer_buy.offer,
+                             quantity_client=offer_buy.quantity,
+                             price_total=offer_buy.total_price_is_offer,
+                             seller=first_offer_seller.user,
+                             seller_offer=first_offer_seller,
+                             quantity_seller=first_offer_seller.quantity,
+                             price_total_1=first_offer_seller.total_price_is_offer)
+        if offer_buy.quantity > first_offer_seller.quantity:
+            offer_buy.quantity -= first_offer_seller.quantity
+            first_offer_seller.quantity -= first_offer_seller.quantity
+            balance_offer_buy.balance -= first_offer_seller.total_price_is_offer
+            balance_offer_sell.balance += first_offer_seller.total_price_is_offer
+            inventory_offer_buy.quantity += first_offer_seller.quantity
+            inventory_offer_sell.quantity -= first_offer_seller.quantity
+            first_offer_seller.is_activate = False
+            first_offer_seller.save()
+            offer_buy.save()
+            balance_offer_sell.save()
+            balance_offer_buy.save()
+            inventory_offer_sell.save()
+            inventory_offer_buy.save()
+            if offer_buy.is_activate:
+                first_offer_seller = list(
+                    Offer.objects.filter(type_function=2, is_activate=True, is_locked=False,
+                                         price__gte=offer_buy.price))
+                for offer_sell in first_offer_seller:
+                    Trade.objects.create(client=offer_buy.user, client_offer=offer_buy,
+                                         quantity_client=offer_buy.quantity,
+                                         price_total=offer_buy.total_price_is_offer,
+                                         seller=offer_sell.user,
+                                         seller_offer=offer_sell,
+                                         quantity_seller=offer_sell.quantity,
+                                         price_total_1=offer_sell.total_price_is_offer)
+                    if not offer_buy.is_activate and balance_offer_buy.balance > offer_sell.total_price_is_offer:
+                        if offer_buy.quantity > offer_sell.quantity:
+                            offer_buy.quantity -= offer_sell.quantity
+                            offer_sell.quantity -= offer_sell.quantity
+                            inventory_offer_buy.quantity += offer_sell.quantity
+                            inventory_offer_sell.quantity -= offer_sell.quantity
+                            balance_offer_buy.balance -= offer_sell.total_price_is_offer
+                            balance_offer_sell.balance += offer_sell.total_price_is_offer
+                            offer_sell.is_activate = False
+                            balance_offer_sell.save()
+                            balance_offer_buy.save()
+                            inventory_offer_sell.save()
+                            inventory_offer_buy.save()
+                            offer_sell.save()
+                            offer_buy.save()
+                        elif offer_buy.quantity < offer_sell.quantity:
+                            offer_sell.quantity -= offer_buy.quantity
+                            offer_buy.quantity -= offer_buy.quantity
+                            inventory_offer_buy.quantity += offer_sell.quantity
+                            inventory_offer_sell.quantity -= offer_sell.quantity
+                            balance_offer_buy.balance = balance_offer_buy.balans - (
+                                    (
+                                            offer_sell.total_price_is_offer /
+                                            offer_sell.quantity) * offer_buy.quantity)
+                            balance_offer_sell.balance = balance_offer_sell.balans + (
+                                    (
+                                            offer_sell.total_price_is_offer /
+                                            offer_sell.quantity) * offer_buy.quantity)
+                            offer_buy.is_activate = False
+                            balance_offer_sell.save()
+                            balance_offer_buy.save()
+                            inventory_offer_sell.save()
+                            inventory_offer_buy.save()
+                            offer_sell.save()
+                            offer_buy.save()
+                        elif offer_buy.quantity == offer_sell.quantity:
+                            offer_buy.quantity -= offer_buy.quantity
+                            offer_sell.quantity -= offer_sell.quantity
+                            inventory_offer_buy.quantity += offer_sell.quantity
+                            inventory_offer_sell.quantity -= offer_sell.quantity
+                            balance_offer_buy.balance -= offer_sell.total_price_is_offer
+                            balance_offer_sell.balance += offer_sell.total_price_is_offer
+                            offer_sell.is_activate = False
+                            offer_buy.is_activate = False
+                            balance_offer_sell.save()
+                            balance_offer_buy.save()
+                            inventory_offer_sell.save()
+                            inventory_offer_buy.save()
+                            offer_sell.save()
+                            offer_buy.save()
                     else:
                         continue
-                elif offer.quantity < offer_sell.quantity:
-                    offer.is_activate = False
-                    balance_offer.balance = balance_offer.balans - ((offer_sell.total_price_is_offer
-                                                                     / offer_sell.quantity) * offer.quantity)
-                    balance_offer_sell.balance = balance_offer_sell.balans + ((offer_sell.total_price_is_offer /
-                                                                               offer_sell.quantity) * offer.quantity)
-                    inventory_offer.quantity += offer.quantity
-                    inventory_offer_sell.quantity -= offer.quantity
-                    offer_sell.quantity -= offer.quantity
-                    offer.quantity -= offer.quantity
-                    balance_offer_sell.save()
-                    balance_offer.save()
-                    inventory_offer.save()
-                    inventory_offer_sell.save()
-                    offer_sell.save()
-                    offer.save()
-                elif offer.quantity == offer_sell.quantity:
-                    balance_offer.balance -= offer_sell.total_price_is_offer
-                    balance_offer_sell.balance += offer_sell.total_price_is_offer
-                    offer_sell.is_activate = False
-                    offer.is_activate = False
-                    inventory_offer_sell.quantity -= offer.quantity
-                    inventory_offer.quantity += offer_sell.quantity
-                    offer.quantity -= offer.quantity
-                    offer_sell.quantity -= offer_sell.quantity
-                    balance_offer_sell.save()
-                    balance_offer.save()
-                    inventory_offer_sell.save()
-                    inventory_offer.save()
-                    offer_sell.save()
-                    offer.save()
-            else:
-                continue
-    else:
-        print("offers are over")
+
+        elif offer_buy.quantity < first_offer_seller.quantity:
+            first_offer_seller.quantity -= offer_buy.quantity
+            offer_buy.quantity -= offer_buy.quantity
+            inventory_offer_buy.quantity += first_offer_seller.quantity
+            inventory_offer_sell.quantity -= first_offer_seller.quantity
+            balance_offer_buy.balance = balance_offer_buy.balans - (
+                    (
+                            first_offer_seller.total_price_is_offer /
+                            first_offer_seller.quantity) * offer_buy.quantity)
+            balance_offer_sell.balance = balance_offer_sell.balans + (
+                    (
+                            first_offer_seller.total_price_is_offer /
+                            first_offer_seller.quantity) * offer_buy.quantity)
+            offer_buy.is_activate = False
+            balance_offer_sell.save()
+            balance_offer_buy.save()
+            inventory_offer_sell.save()
+            inventory_offer_buy.save()
+            first_offer_seller.save()
+            offer_buy.save()
+
+        elif offer_buy.quantity == first_offer_seller.quantity:
+            offer_buy.quantity -= offer_buy.quantity
+            first_offer_seller.quantity -= first_offer_seller.quantity
+            balance_offer_buy.balance -= first_offer_seller.total_price_is_offer
+            balance_offer_sell.balance += first_offer_seller.total_price_is_offer
+            inventory_offer_buy.quantity += first_offer_seller.quantity
+            inventory_offer_sell.quantity -= first_offer_seller.quantity
+            first_offer_seller.is_activate = False
+            offer_buy.is_activate = False
+            first_offer_seller.save()
+            offer_buy.save()
+            balance_offer_sell.save()
+            balance_offer_buy.save()
+            inventory_offer_sell.save()
+            inventory_offer_buy.save()
